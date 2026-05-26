@@ -22,44 +22,12 @@ main {
   padding-top: 0.5rem !important;
 }
 
-/* --- Безупречная диагональная волна Senior-уровня --- */
-html {
-  view-transition-name: none;
-}
-
-/* Полностью убираем дефолтное моргание и cross-fade браузера */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
 }
 
-/* Старый темный/светлый кадр остается неподвижным снизу */
-::view-transition-old(root) {
-  z-index: 1;
-}
-
-/* Новый кадр плавно накрывает экран идеальным кругом из верхнего правого угла */
-::view-transition-new(root) {
-  z-index: 99999;
-  animation: theme-wave-slide 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  clip-path: circle(0% at 100% 0%);
-}
-
-.dark::view-transition-new(root) {
-  clip-path: circle(150% at 100% 0%);
-}
-
-@keyframes theme-wave-slide {
-  from {
-    clip-path: circle(0% at 100% 0%);
-  }
-  to {
-    clip-path: circle(150% at 100% 0%);
-  }
-}
-
-/* Хак для подавления конфликтующих CSS-транзишенов во время анимации */
 .disable-transitions * {
   transition: none !important;
 }
