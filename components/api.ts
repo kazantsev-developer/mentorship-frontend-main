@@ -2,10 +2,8 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 function getToken() {
   if (typeof document === "undefined") return null;
-  // сначала пытаемся взять токен из куки
   const match = document.cookie.match(/token=([^;]+)/);
   if (match) return match[1];
-  // fallback: из localStorage (для обхода проблем с куками)
   return localStorage.getItem("token");
 }
 

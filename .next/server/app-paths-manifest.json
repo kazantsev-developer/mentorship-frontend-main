@@ -1,6 +1,7 @@
 {
-  "/(main)/student/calendar/page": "app/(main)/student/calendar/page.js",
-  "/(main)/student/roadmap/page": "app/(main)/student/roadmap/page.js",
+  "/page": "app/page.js",
   "/(main)/student/progress/page": "app/(main)/student/progress/page.js",
-  "/(main)/student/interviews/page": "app/(main)/student/interviews/page.js"
+  "/(main)/student/calendar/page": "app/(main)/student/calendar/page.js",
+  "/(main)/student/interviews/page": "app/(main)/student/interviews/page.js",
+  "/(main)/student/roadmap/page": "app/(main)/student/roadmap/page.js"
 }

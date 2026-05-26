@@ -4,8 +4,6 @@ import { api } from "@/components/api";
 import {
   Tabs,
   Tab,
-  Card,
-  CardBody,
   Button,
   Chip,
   Link,
@@ -44,6 +42,7 @@ export default function StudentInterviews() {
   const [url, setUrl] = useState("");
   const [grade, setGrade] = useState("Junior");
   const [stack, setStack] = useState("");
+  const [selectedTab, setSelectedTab] = useState("my");
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const loadInterviews = async () => {
@@ -188,8 +187,31 @@ export default function StudentInterviews() {
 
   return (
     <div className="w-full max-w-[1400px] mx-auto bg-canvas min-h-screen text-text-main py-4 space-y-6">
-      <div className="flex justify-between items-center">
-        <div />
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <Tabs
+          selectedKey={selectedTab}
+          onSelectionChange={(key) => setSelectedTab(key as string)}
+          variant="underlined"
+          color="primary"
+          classNames={{ tabList: "border-b border-border-subtle" }}
+        >
+          <Tab
+            key="my"
+            title={
+              <div className="flex items-center gap-2 font-mono text-xs font-bold uppercase py-1">
+                Мои интервью ({myInterviews.length})
+              </div>
+            }
+          />
+          <Tab
+            key="global"
+            title={
+              <div className="flex items-center gap-2 font-mono text-xs font-bold uppercase py-1">
+                Общая база ({globalInterviews.length})
+              </div>
+            }
+          />
+        </Tabs>
         <Button
           size="sm"
           color="primary"
@@ -200,46 +222,27 @@ export default function StudentInterviews() {
         </Button>
       </div>
 
-      <Tabs
-        variant="underlined"
-        color="primary"
-        classNames={{ tabList: "border-b border-border-subtle w-full" }}
-      >
-        <Tab
-          key="my"
-          title={
-            <div className="flex items-center gap-2 font-mono text-xs font-bold uppercase py-1">
-              Мои интервью ({myInterviews.length})
-            </div>
-          }
-        >
-          <div className="flex flex-col gap-3 mt-3">
-            {myInterviews.map(renderCard)}
-            {myInterviews.length === 0 && (
-              <p className="text-xs font-mono text-text-muted text-center py-8">
-                Интервью пока не проводились.
-              </p>
-            )}
-          </div>
-        </Tab>
-        <Tab
-          key="global"
-          title={
-            <div className="flex items-center gap-2 font-mono text-xs font-bold uppercase py-1">
-              Общая база ({globalInterviews.length})
-            </div>
-          }
-        >
-          <div className="flex flex-col gap-3 mt-3">
-            {globalInterviews.map(renderCard)}
-            {globalInterviews.length === 0 && (
-              <p className="text-xs font-mono text-text-muted text-center py-8">
-                Общий каталог пуст.
-              </p>
-            )}
-          </div>
-        </Tab>
-      </Tabs>
+      {selectedTab === "my" && (
+        <div>
+          {myInterviews.map(renderCard)}
+          {myInterviews.length === 0 && (
+            <p className="text-xs font-mono text-text-muted text-center py-8">
+              Интервью пока не проводились.
+            </p>
+          )}
+        </div>
+      )}
+
+      {selectedTab === "global" && (
+        <div>
+          {globalInterviews.map(renderCard)}
+          {globalInterviews.length === 0 && (
+            <p className="text-xs font-mono text-text-muted text-center py-8">
+              Общий каталог пуст.
+            </p>
+          )}
+        </div>
+      )}
 
       <Modal
         isOpen={isOpen}

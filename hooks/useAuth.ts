@@ -44,9 +44,7 @@ export function useAuth() {
       telegram_username: userData.telegram_username,
     };
 
-    // Пытаемся установить куку (может не сработать, но пробуем)
     document.cookie = `token=${data.token}; path=/; max-age=604800; SameSite=Lax`;
-    // Дублируем в localStorage – это надёжнее для текущей сессии
     localStorage.setItem("token", data.token);
 
     console.log("Cookie set:", document.cookie);
@@ -67,6 +65,7 @@ export function useAuth() {
     if (typeof window !== "undefined")
       localStorage.setItem("selectedRole", role);
   };
+
   const getSelectedRole = () => {
     if (typeof window !== "undefined")
       return localStorage.getItem("selectedRole");
