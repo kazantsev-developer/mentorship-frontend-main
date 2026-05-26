@@ -89,6 +89,7 @@ export default function StudentInterviews() {
         url,
         grade,
         stack,
+        date: new Date().toISOString(),
       });
       await loadInterviews();
       onClose();
