@@ -1,10 +1,14 @@
-'use client';
-import { useAuth } from '@/hooks/useAuth';
-import Sidebar from '@/components/navigation/sidebar';
-import Header from '@/components/navigation/header';
-import Loader from '@/components/ui/loader';
+"use client";
+import { useAuth } from "@/hooks/useAuth";
+import Sidebar from "@/components/navigation/sidebar";
+import Header from "@/components/navigation/header";
+import Loader from "@/components/ui/loader";
 
-export default function MainLayout({ children }: { children: React.ReactNode }) {
+export default function MainLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { user, loading, getSelectedRole } = useAuth();
   const role = getSelectedRole();
 

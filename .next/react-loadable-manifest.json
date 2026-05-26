@@ -47,6 +47,8 @@
   },
   "node_modules/@heroui/tooltip/dist/chunk-CSXHODZI.mjs -> @heroui/dom-animation": {
     "id": "node_modules/@heroui/tooltip/dist/chunk-CSXHODZI.mjs -> @heroui/dom-animation",
-    "files": []
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_heroui_tooltip_node_modules_heroui_dom-animation_dist_index_mjs.js"
+    ]
   }
 }

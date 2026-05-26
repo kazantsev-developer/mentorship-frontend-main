@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { api } from '@/components/api';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { api } from "@/components/api";
 
 export interface AuthUser {
   id: string;
@@ -17,14 +17,19 @@ export function useAuth() {
   const router = useRouter();
 
   useEffect(() => {
-    api.get<AuthUser>('/api/user/profile')
+    api
+      .get<AuthUser>("/api/user/profile")
       .then(setUser)
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
   }, []);
 
   const login = async (login: string, password: string) => {
-    const data = await api.post<{ token: string; user: AuthUser; roles?: string[] }>('/api/auth/login', { login, password });
+    const data = await api.post<{
+      token: string;
+      user: AuthUser;
+      roles?: string[];
+    }>("/api/auth/login", { login, password });
     const userData = data.user;
     const rolesArray = data.roles || (userData as any).roles || [];
     const fullUser: AuthUser = {
@@ -41,16 +46,18 @@ export function useAuth() {
   };
 
   const logout = async () => {
-    document.cookie = 'token=; path=/; max-age=0';
+    document.cookie = "token=; path=/; max-age=0";
     setUser(null);
-    router.push('/login');
+    router.push("/login");
   };
 
   const selectRole = (role: string) => {
-    if (typeof window !== 'undefined') localStorage.setItem('selectedRole', role);
+    if (typeof window !== "undefined")
+      localStorage.setItem("selectedRole", role);
   };
   const getSelectedRole = () => {
-    if (typeof window !== 'undefined') return localStorage.getItem('selectedRole');
+    if (typeof window !== "undefined")
+      return localStorage.getItem("selectedRole");
     return null;
   };
 

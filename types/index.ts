@@ -7,7 +7,7 @@ export interface User {
   telegram_username?: string;
   learning_started_at?: string;
   is_profile_private: boolean;
-  roles: ('student' | 'buddy' | 'admin')[];
+  roles: ("student" | "buddy" | "admin")[];
 }
 
 export interface RoadmapMaterial {
@@ -15,8 +15,8 @@ export interface RoadmapMaterial {
   block_id: string;
   title: string;
   description?: string;
-  type: 'theory' | 'questions' | 'practice' | 'homework';
-  content_type: 'url' | 'youtube' | 'github' | 'article' | 'text' | 'file';
+  type: "theory" | "questions" | "practice" | "homework";
+  content_type: "url" | "youtube" | "github" | "article" | "text" | "file";
   url?: string;
   content?: string;
   is_required: boolean;
@@ -33,7 +33,11 @@ export interface RoadmapBlock {
   is_active: boolean;
   materials: RoadmapMaterial[];
   progress?: {
-    status: 'not_started' | 'in_progress' | 'waiting_buddy_confirmation' | 'approved';
+    status:
+      | "not_started"
+      | "in_progress"
+      | "waiting_buddy_confirmation"
+      | "approved";
     percent: number;
   };
 }
@@ -41,7 +45,12 @@ export interface RoadmapBlock {
 export interface BonusTransaction {
   id: string;
   user_id: string;
-  type: 'achievement_reward' | 'discount_conversion' | 'one_on_one_spend' | 'manual_adjustment' | 'refund';
+  type:
+    | "achievement_reward"
+    | "discount_conversion"
+    | "one_on_one_spend"
+    | "manual_adjustment"
+    | "refund";
   amount: number;
   reason: string;
   created_at: string;

@@ -3,19 +3,19 @@
 @tailwind utilities;
 
 :root {
-  --canvas: #F8F9FA;
-  --surface: #FFFFFF;
-  --border-subtle: #ECEFF1;
-  --text-main: #1A1D20;
-  --text-muted: #64748B;
+  --canvas: #f8f9fa;
+  --surface: #ffffff;
+  --border-subtle: #eceff1;
+  --text-main: #1a1d20;
+  --text-muted: #64748b;
 }
 
 .dark {
-  --canvas: #0B0F19;
+  --canvas: #0b0f19;
   --surface: #111827;
-  --border-subtle: #1F2937;
-  --text-main: #F9FAFB;
-  --text-muted: #9CA3AF;
+  --border-subtle: #1f2937;
+  --text-main: #f9fafb;
+  --text-muted: #9ca3af;
 }
 
 main {

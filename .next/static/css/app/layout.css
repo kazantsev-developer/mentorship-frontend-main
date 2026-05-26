@@ -577,9 +577,6 @@ video {
 .bottom-0 {
   bottom: 0px;
 }
-.bottom-2 {
-  bottom: 0.5rem;
-}
 .bottom-\[10\%\] {
   bottom: 10%;
 }
@@ -840,9 +837,6 @@ video {
 }
 .mt-4 {
   margin-top: 1rem;
-}
-.mt-6 {
-  margin-top: 1.5rem;
 }
 .mt-auto {
   margin-top: auto;
@@ -2243,6 +2237,10 @@ video {
 .bg-background\/80 {
   background-color: hsl(var(--heroui-background) / 0.8);
 }
+.bg-blue-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(59 130 246 / var(--tw-bg-opacity, 1));
+}
 .bg-border-subtle {
   background-color: var(--border-subtle);
 }
@@ -2342,6 +2340,14 @@ video {
 .bg-foreground\/10 {
   background-color: hsl(var(--heroui-foreground) / 0.1);
 }
+.bg-green-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(34 197 94 / var(--tw-bg-opacity, 1));
+}
+.bg-orange-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(249 115 22 / var(--tw-bg-opacity, 1));
+}
 .bg-overlay\/30 {
   background-color: hsl(var(--heroui-overlay) / 0.3);
 }
@@ -2366,6 +2372,14 @@ video {
 }
 .bg-primary\/20 {
   background-color: hsl(var(--heroui-primary) / 0.2);
+}
+.bg-purple-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(168 85 247 / var(--tw-bg-opacity, 1));
+}
+.bg-red-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(239 68 68 / var(--tw-bg-opacity, 1));
 }
 .bg-rose-500 {
   --tw-bg-opacity: 1;
@@ -2771,6 +2785,9 @@ video {
 .text-\[11px\] {
   font-size: 11px;
 }
+.text-\[9px\] {
+  font-size: 9px;
+}
 .text-base {
   font-size: 1rem;
   line-height: 1.5rem;
@@ -3119,9 +3136,6 @@ video {
 }
 .opacity-30 {
   opacity: 0.3;
-}
-.opacity-40 {
-  opacity: 0.4;
 }
 .opacity-50 {
   opacity: 0.5;
@@ -3795,19 +3809,19 @@ video {
 }
 
 :root {
-  --canvas: #F8F9FA;
-  --surface: #FFFFFF;
-  --border-subtle: #ECEFF1;
-  --text-main: #1A1D20;
-  --text-muted: #64748B;
+  --canvas: #f8f9fa;
+  --surface: #ffffff;
+  --border-subtle: #eceff1;
+  --text-main: #1a1d20;
+  --text-muted: #64748b;
 }
 
 .dark {
-  --canvas: #0B0F19;
+  --canvas: #0b0f19;
   --surface: #111827;
-  --border-subtle: #1F2937;
-  --text-main: #F9FAFB;
-  --text-muted: #9CA3AF;
+  --border-subtle: #1f2937;
+  --text-main: #f9fafb;
+  --text-muted: #9ca3af;
 }
 
 main {
@@ -4687,6 +4701,12 @@ html {
 .focus-within\:after\:w-full:focus-within::after {
   content: var(--tw-content);
   width: 100%;
+}
+.hover\:h-2\.5:hover {
+  height: 0.625rem;
+}
+.hover\:w-2\.5:hover {
+  width: 0.625rem;
 }
 .hover\:-translate-x-0:hover {
   --tw-translate-x: -0px;
