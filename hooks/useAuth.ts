@@ -30,6 +30,9 @@ export function useAuth() {
       user: AuthUser;
       roles?: string[];
     }>("/api/auth/login", { login, password });
+
+    console.log("Token received:", data.token);
+
     const userData = data.user;
     const rolesArray = data.roles || (userData as any).roles || [];
     const fullUser: AuthUser = {
@@ -40,13 +43,22 @@ export function useAuth() {
       avatar_url: userData.avatar_url,
       telegram_username: userData.telegram_username,
     };
-    document.cookie = `token=${data.token}; path=/; max-age=604800`;
+
+    // Пытаемся установить куку (может не сработать, но пробуем)
+    document.cookie = `token=${data.token}; path=/; max-age=604800; SameSite=Lax`;
+    // Дублируем в localStorage – это надёжнее для текущей сессии
+    localStorage.setItem("token", data.token);
+
+    console.log("Cookie set:", document.cookie);
+    console.log("LocalStorage token:", localStorage.getItem("token"));
+
     setUser(fullUser);
     return fullUser;
   };
 
   const logout = async () => {
     document.cookie = "token=; path=/; max-age=0";
+    localStorage.removeItem("token");
     setUser(null);
     router.push("/login");
   };
