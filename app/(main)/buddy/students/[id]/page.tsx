@@ -18,6 +18,7 @@ import {
   ModalFooter,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { toast } from "sonner";
 
 interface BlockProgress {
   id: string;
@@ -30,15 +31,27 @@ interface BlockProgress {
   percent: number;
 }
 
+interface Student {
+  id: string;
+  display_name: string;
+}
+
+interface Activity {
+  id: string;
+  reason?: string;
+  metadata?: { description?: string };
+  created_at: string;
+}
+
 export default function BuddyStudentDetail({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id: studentId } = use(params);
-  const [student, setStudent] = useState<any>(null);
+  const [student, setStudent] = useState<Student | null>(null);
   const [blocks, setBlocks] = useState<BlockProgress[]>([]);
-  const [activity, setActivity] = useState<any[]>([]);
+  const [activity, setActivity] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [company, setCompany] = useState("");
   const [position, setPosition] = useState("");
@@ -49,9 +62,9 @@ export default function BuddyStudentDetail({
   const loadData = async () => {
     try {
       const [studentRes, blocksRes, activityRes] = await Promise.all([
-        api.get(`/api/buddy/students/${studentId}`),
-        api.get(`/api/buddy/students/${studentId}/roadmap`),
-        api.get(`/api/buddy/students/${studentId}/activity`).catch(() => []),
+        api.get<Student>(`/api/buddy/students/${studentId}`),
+        api.get<BlockProgress[]>(`/api/buddy/students/${studentId}/roadmap`).catch(() => []),
+        api.get<Activity[]>(`/api/buddy/students/${studentId}/activity`).catch(() => []),
       ]);
       setStudent(studentRes);
       setBlocks(blocksRes || []);
@@ -68,29 +81,40 @@ export default function BuddyStudentDetail({
   }, [studentId]);
 
   const approveBlock = async (blockId: string) => {
-    await api.post("/api/blocks/approve", {
-      student_id: studentId,
-      block_id: blockId,
-    });
-    await loadData();
+    try {
+      await api.post("/api/blocks/approve", {
+        student_id: studentId,
+        block_id: blockId,
+      });
+      toast.success("Блок подтверждён! Студент получит бонусы");
+      await loadData();
+    } catch (err) {
+      toast.error("Ошибка подтверждения блока");
+    }
   };
 
   const createMock = async () => {
     if (!company || !position) return;
     setSubmittingMock(true);
-    await api.post("/api/interviews/mock", {
-      student_id: studentId,
-      company,
-      position,
-      feedback,
-      status: "completed",
-    });
-    setCompany("");
-    setPosition("");
-    setFeedback("");
-    await loadData();
-    onClose();
-    setSubmittingMock(false);
+    try {
+      await api.post("/api/interviews/mock", {
+        student_id: studentId,
+        company,
+        position,
+        feedback,
+        status: "completed",
+      });
+      toast.success("Mock-собеседование сохранено");
+      setCompany("");
+      setPosition("");
+      setFeedback("");
+      await loadData();
+      onClose();
+    } catch (err) {
+      toast.error("Ошибка сохранения mock-собеседования");
+    } finally {
+      setSubmittingMock(false);
+    }
   };
 
   if (loading)

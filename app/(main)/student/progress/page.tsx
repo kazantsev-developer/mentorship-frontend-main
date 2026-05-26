@@ -23,6 +23,7 @@ import {
   Spinner,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { toast } from "sonner";
 
 interface Transaction {
   id: string;
@@ -57,6 +58,8 @@ interface RoadmapBlock {
   };
 }
 
+const STORAGE_KEY = "shown_achievement_toasts";
+
 export default function StudentProgress() {
   const [profile, setProfile] = useState<any>(null);
   const [balance, setBalance] = useState(0);
@@ -68,9 +71,26 @@ export default function StudentProgress() {
   const [submitting1x1, setSubmitting1x1] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  // Данные для прогресса из roadmap
   const [overallProgress, setOverallProgress] = useState(0);
   const [currentBlockTitle, setCurrentBlockTitle] = useState("Основной");
+
+  const getShownIds = (): Set<string> => {
+    if (typeof window === "undefined") return new Set();
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return new Set();
+    try {
+      return new Set(JSON.parse(stored));
+    } catch {
+      return new Set();
+    }
+  };
+
+  const markShown = (id: string) => {
+    if (typeof window === "undefined") return;
+    const shown = getShownIds();
+    shown.add(id);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(shown)));
+  };
 
   const loadData = async () => {
     try {
@@ -95,12 +115,25 @@ export default function StudentProgress() {
         created_at: t.CreatedAt || t.created_at,
       }));
       setTransactions(normalized);
-      setAchievements(achRes || []);
+
+      const newAchievements = achRes || [];
+      const shownIds = getShownIds();
+
+      newAchievements.forEach((ach) => {
+        if (ach.unlocked && !shownIds.has(ach.id)) {
+          toast.success(
+            `Достижение получено: ${ach.title} (+${ach.reward_bonus} бонусов)`,
+            { duration: 5000 },
+          );
+          markShown(ach.id);
+        }
+      });
+
+      setAchievements(newAchievements);
       setProfile(profileRes);
       setFinalChecks(checksRes || []);
       setDiscount(Math.min(Math.floor((balRes.balance || 0) / 100), 15));
 
-      // Вычисляем общий прогресс и текущий блок
       if (roadmapRes && roadmapRes.length > 0) {
         const totalPercent = roadmapRes.reduce(
           (sum, block) => sum + (block.progress?.percent || 0),
@@ -108,16 +141,12 @@ export default function StudentProgress() {
         );
         const avgPercent = Math.round(totalPercent / roadmapRes.length);
         setOverallProgress(avgPercent);
-
-        // Находим первый блок, который не завершён (статус не approved)
         const current = roadmapRes.find(
           (block) => block.progress?.status !== "approved",
         );
-        if (current) {
-          setCurrentBlockTitle(current.title);
-        } else if (roadmapRes.length > 0) {
+        if (current) setCurrentBlockTitle(current.title);
+        else if (roadmapRes.length > 0)
           setCurrentBlockTitle(roadmapRes[0].title);
-        }
       }
     } catch (err) {
       console.error(err);
@@ -131,16 +160,32 @@ export default function StudentProgress() {
   }, []);
 
   const convertBonus = async () => {
-    await api.post("/api/bonus/convert", { bonus_amount: 100 });
-    loadData();
+    try {
+      await api.post("/api/bonus/convert", { bonus_amount: 100 });
+      toast.success("100 бонусов конвертировано в 1% скидки", {
+        duration: 3000,
+      });
+      await loadData();
+    } catch {
+      toast.error("Ошибка конвертации бонусов", { duration: 3000 });
+    }
   };
 
   const createOneOnOne = async () => {
     setSubmitting1x1(true);
-    await api.post("/api/one-on-one");
-    await loadData();
-    onClose();
-    setSubmitting1x1(false);
+    try {
+      await api.post("/api/one-on-one");
+      toast.success(
+        "Заявка на 1x1 создана. Ожидайте подтверждения администратора",
+        { duration: 4000 },
+      );
+      await loadData();
+      onClose();
+    } catch {
+      toast.error("Ошибка создания заявки", { duration: 3000 });
+    } finally {
+      setSubmitting1x1(false);
+    }
   };
 
   if (loading)
@@ -152,7 +197,6 @@ export default function StudentProgress() {
       />
     );
 
-  // Вычисление дней обучения: используем поле learning_started_at из профиля
   const daysInProgram = profile?.learning_started_at
     ? Math.floor(
         (Date.now() - new Date(profile.learning_started_at).getTime()) /
@@ -267,10 +311,23 @@ export default function StudentProgress() {
           {achievements.map((ach) => (
             <div
               key={ach.id}
-              className={`relative flex flex-col items-center p-4 bg-surface border rounded-xl text-center transition-all ${ach.unlocked ? "border-brand-purple/30 shadow-sm" : "border-border-subtle opacity-50 grayscale"}`}
+              className={`relative flex flex-col items-center p-4 bg-surface border rounded-xl text-center transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95 ${
+                ach.unlocked
+                  ? "border-brand-purple/30 shadow-sm hover:shadow-md"
+                  : "border-border-subtle opacity-50 grayscale"
+              }`}
+              onClick={() => {
+                if (ach.unlocked) {
+                  toast(`${ach.title}: ${ach.description}`, { duration: 3000 });
+                }
+              }}
             >
               <div
-                className={`p-3 rounded-full mb-2 ${ach.unlocked ? "bg-brand-purple/10 text-brand-purple" : "bg-canvas text-text-muted"}`}
+                className={`p-3 rounded-full mb-2 transition-all ${
+                  ach.unlocked
+                    ? "bg-brand-purple/10 text-brand-purple"
+                    : "bg-canvas text-text-muted"
+                }`}
               >
                 <Icon
                   icon={
