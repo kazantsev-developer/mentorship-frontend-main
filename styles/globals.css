@@ -2,18 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
-input,
-textarea,
-select {
-  outline: none !important;
-  box-shadow: none !important;
-  border-color: #e4e4e7 !important;
+:root {
+  --canvas: #f8f9fa;
+  --surface: #ffffff;
+  --border-subtle: #eceff1;
+  --text-main: #1a1d20;
+  --text-muted: #64748b;
 }
 
-input:focus,
-textarea:focus,
-select:focus {
-  outline: none !important;
-  box-shadow: none !important;
-  border-color: #006fee !important;
+.dark {
+  --canvas: #0b0f19;
+  --surface: #111827;
+  --border-subtle: #1f2937;
+  --text-main: #f9fafb;
+  --text-muted: #9ca3af;
+}
+
+main {
+  padding-top: 0.5rem !important;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+.disable-transitions * {
+  transition: none !important;
 }

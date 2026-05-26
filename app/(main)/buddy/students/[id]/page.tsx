@@ -1,30 +1,288 @@
-'use client';
-import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { api } from '@/components/api';
-import { Progress, Button, Card, CardBody, Tabs, Tab, Spinner, Chip } from '@heroui/react';
-import { Icon } from '@iconify/react';
+"use client";
+import { useEffect, useState, use } from "react";
+import { api } from "@/components/api";
+import {
+  Card,
+  CardBody,
+  Button,
+  Chip,
+  Spinner,
+  Progress,
+  Textarea,
+  Input,
+  useDisclosure,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@heroui/react";
+import { Icon } from "@iconify/react";
+import { toast } from "sonner";
 
-export default function StudentDetail() {
-  const { id } = useParams();
-  const [student, setStudent] = useState<any>(null);
+interface BlockProgress {
+  id: string;
+  title: string;
+  status:
+    | "not_started"
+    | "in_progress"
+    | "waiting_buddy_confirmation"
+    | "approved";
+  percent: number;
+}
+
+interface Student {
+  id: string;
+  display_name: string;
+}
+
+interface Activity {
+  id: string;
+  reason?: string;
+  metadata?: { description?: string };
+  created_at: string;
+}
+
+export default function BuddyStudentDetail({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id: studentId } = use(params);
+  const [student, setStudent] = useState<Student | null>(null);
+  const [blocks, setBlocks] = useState<BlockProgress[]>([]);
+  const [activity, setActivity] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
-  const load = async () => {
-    const students = await api.get('/api/my-students');
-    const found = students.find((s: any) => s.id === id);
-    if (found) setStudent({ ...found, blocks: found.blocks || [] });
-    setLoading(false);
+  const [company, setCompany] = useState("");
+  const [position, setPosition] = useState("");
+  const [feedback, setFeedback] = useState("");
+  const [submittingMock, setSubmittingMock] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const loadData = async () => {
+    try {
+      const [studentRes, blocksRes, activityRes] = await Promise.all([
+        api.get<Student>(`/api/buddy/students/${studentId}`),
+        api.get<BlockProgress[]>(`/api/buddy/students/${studentId}/roadmap`).catch(() => []),
+        api.get<Activity[]>(`/api/buddy/students/${studentId}/activity`).catch(() => []),
+      ]);
+      setStudent(studentRes);
+      setBlocks(blocksRes || []);
+      setActivity(activityRes || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
-  useEffect(() => { load(); }, [id]);
+
+  useEffect(() => {
+    loadData();
+  }, [studentId]);
+
   const approveBlock = async (blockId: string) => {
-    await api.post('/api/blocks/approve', { student_id: id, block_id: blockId });
-    load();
+    try {
+      await api.post("/api/blocks/approve", {
+        student_id: studentId,
+        block_id: blockId,
+      });
+      toast.success("Блок подтверждён! Студент получит бонусы");
+      await loadData();
+    } catch (err) {
+      toast.error("Ошибка подтверждения блока");
+    }
   };
-  if (loading) return <Spinner />;
-  if (!student) return <div>Ученик не найден</div>;
-  return (<div className="max-w-4xl mx-auto py-8 space-y-6"><h1 className="text-3xl font-bold">{student.display_name}</h1><Card><CardBody><p>Общий прогресс: {student.overall_progress_percent}%</p><Progress value={student.overall_progress_percent} color="primary" /></CardBody></Card>
-  <Tabs><Tab title="Блоки">{student.blocks.map((b: any) => (<Card key={b.block_id} className="mb-4"><CardBody><div className="flex justify-between items-center"><div><p className="font-semibold">{b.title}</p><p>Прогресс: {b.percent}%</p><Chip size="sm" color={b.status==='approved'?'success':b.status==='waiting_buddy_confirmation'?'warning':'default'}>{b.status}</Chip></div>{b.status==='waiting_buddy_confirmation' && <Button color="success" startContent={<Icon icon="solar:check-circle-linear" width="18" height="18" />} onPress={()=>approveBlock(b.block_id)}>Подтвердить блок</Button>}</div></CardBody></Card>))}</Tab>
-  <Tab title="Собеседования">{student.interviews?.length? student.interviews.map((i: any)=>(<Card key={i.id} className="mb-2"><CardBody><p>{i.type} — {i.company} ({i.position})</p><p>Статус: {i.status}</p>{i.feedback && <p>Фидбэк: {i.feedback}</p>}</CardBody></Card>)) : <p>Нет собеседований</p>}</Tab>
-  <Tab title="Финальные проверки">{student.final_checks?.map((fc: any)=>(<Card key={fc.id} className="mb-2"><CardBody><p>{fc.type} — статус: {fc.status}</p></CardBody></Card>))}</Tab>
-  </Tabs></div>);
+
+  const createMock = async () => {
+    if (!company || !position) return;
+    setSubmittingMock(true);
+    try {
+      await api.post("/api/interviews/mock", {
+        student_id: studentId,
+        company,
+        position,
+        feedback,
+        status: "completed",
+      });
+      toast.success("Mock-собеседование сохранено");
+      setCompany("");
+      setPosition("");
+      setFeedback("");
+      await loadData();
+      onClose();
+    } catch (err) {
+      toast.error("Ошибка сохранения mock-собеседования");
+    } finally {
+      setSubmittingMock(false);
+    }
+  };
+
+  if (loading)
+    return (
+      <Spinner className="flex h-[70vh] justify-center" color="secondary" />
+    );
+
+  return (
+    <div className="w-full max-w-[1400px] mx-auto bg-canvas min-h-screen text-text-main py-2 space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-border-subtle pb-4 gap-4">
+        <div>
+          <h1 className="text-xl font-bold font-mono text-text-main">
+            {student?.display_name}
+          </h1>
+          <p className="text-xs text-text-muted mt-0.5 font-mono">
+            ID: {studentId}
+          </p>
+        </div>
+        <Button
+          size="sm"
+          color="primary"
+          className="font-mono text-xs"
+          startContent={<Icon icon="lucide:video" />}
+          onClick={onOpen}
+        >
+          Зафиксировать Mock-интервью
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-4">
+          <h3 className="text-xs font-bold uppercase tracking-wider font-mono text-text-muted">
+            Прогресс по блокам
+          </h3>
+          {blocks.map((block) => {
+            const isWaiting = block.status === "waiting_buddy_confirmation";
+            const isApproved = block.status === "approved";
+            return (
+              <Card
+                key={block.id}
+                className={`bg-surface border shadow-none rounded-xl ${isWaiting ? "border-amber-500/40" : "border-border-subtle"}`}
+              >
+                <CardBody className="p-4 space-y-4">
+                  <div className="flex justify-between items-center flex-wrap gap-2">
+                    <div>
+                      <h4 className="text-sm font-bold font-mono">
+                        {block.title}
+                      </h4>
+                      <p className="text-[11px] text-text-muted mt-0.5">
+                        Материалов изучено: {block.percent}%
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {isWaiting && (
+                        <Button
+                          size="sm"
+                          color="warning"
+                          variant="flat"
+                          className="h-7 text-xs font-mono"
+                          onClick={() => approveBlock(block.id)}
+                        >
+                          Подтвердить блок
+                        </Button>
+                      )}
+                      {isApproved && (
+                        <Chip
+                          size="sm"
+                          color="success"
+                          variant="flat"
+                          startContent={
+                            <Icon
+                              icon="lucide:check-circle"
+                              className="w-3 h-3"
+                            />
+                          }
+                        >
+                          Закрыт
+                        </Chip>
+                      )}
+                    </div>
+                  </div>
+                  <Progress
+                    value={block.percent}
+                    size="sm"
+                    color={
+                      isApproved ? "success" : isWaiting ? "warning" : "primary"
+                    }
+                  />
+                </CardBody>
+              </Card>
+            );
+          })}
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-xs font-bold uppercase tracking-wider font-mono text-text-muted">
+            Лог активности
+          </h3>
+          <Card className="bg-surface border border-border-subtle shadow-none rounded-xl">
+            <CardBody className="p-4 space-y-4 max-h-[500px] overflow-y-auto">
+              {activity.length === 0 && (
+                <p className="text-xs text-text-muted text-center py-4">
+                  Нет активности
+                </p>
+              )}
+              {activity.map((act, idx) => (
+                <div key={act.id || idx} className="flex gap-3 text-xs">
+                  <div className="p-1.5 bg-canvas rounded border border-border-subtle text-text-muted">
+                    <Icon icon="lucide:activity" className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <p className="text-text-main">
+                      {act.reason || act.metadata?.description || "Действие"}
+                    </p>
+                    <p className="text-[10px] text-text-muted font-mono">
+                      {new Date(act.created_at).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </CardBody>
+          </Card>
+        </div>
+      </div>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalContent>
+          <ModalHeader className="font-mono">
+            Результаты Mock-собеседования
+          </ModalHeader>
+          <ModalBody className="space-y-3">
+            <Input
+              label="Компания"
+              placeholder="Яндекс"
+              size="sm"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+            />
+            <Input
+              label="Позиция"
+              placeholder="Junior Go"
+              size="sm"
+              value={position}
+              onChange={(e) => setPosition(e.target.value)}
+            />
+            <Textarea
+              label="Фидбэк"
+              placeholder="Что понравилось, что улучшить..."
+              size="sm"
+              value={feedback}
+              onChange={(e) => setFeedback(e.target.value)}
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button size="sm" variant="flat" onClick={onClose}>
+              Отмена
+            </Button>
+            <Button
+              size="sm"
+              color="primary"
+              isLoading={submittingMock}
+              onClick={createMock}
+            >
+              Сохранить
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </div>
+  );
 }

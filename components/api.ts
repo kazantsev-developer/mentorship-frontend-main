@@ -3,7 +3,8 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 function getToken() {
   if (typeof document === "undefined") return null;
   const match = document.cookie.match(/token=([^;]+)/);
-  return match ? match[1] : null;
+  if (match) return match[1];
+  return localStorage.getItem("token");
 }
 
 async function request<T>(
