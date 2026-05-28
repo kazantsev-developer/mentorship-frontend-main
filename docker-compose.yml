@@ -1,0 +1,10 @@
+services:
+  frontend:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_API_URL: http://185.75.189.130:8080
+    container_name: mentorship_frontend
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
