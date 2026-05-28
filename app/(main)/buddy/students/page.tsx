@@ -32,8 +32,10 @@ export default function BuddyStudents() {
   useEffect(() => {
     api
       .get("/api/my-students")
-      .then((data) => {
-        const normalized = (data || []).map((s: any) => ({
+      .then((response: any) => {
+        const rawStudents = response.data || [];
+
+        const normalized = rawStudents.map((s: any) => ({
           id: s.id || s.ID,
           display_name: s.display_name,
           avatar_url: s.avatar_url,
