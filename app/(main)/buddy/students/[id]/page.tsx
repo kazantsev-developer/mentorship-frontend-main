@@ -500,12 +500,15 @@ export default function BuddyStudentDetail({
                 Прожарка
               </SelectItem>
             </Select>
-            <Input
-              type="datetime-local"
-              size="sm"
-              value={scheduledAt}
-              onChange={(e) => setScheduledAt(e.target.value)}
-            />
+            <div className="mb-4">
+              <Input
+                type="datetime-local"
+                size="sm"
+                value={scheduledAt}
+                onChange={(e) => setScheduledAt(e.target.value)}
+                placeholder="Дата и время"
+              />
+            </div>
           </ModalBody>
           <ModalFooter>
             <Button size="sm" variant="flat" onClick={onFinalClose}>
