@@ -56,6 +56,10 @@ export default function StudentCalendar() {
   const [filterType, setFilterType] = useState("all");
   const [loading, setLoading] = useState(true);
 
+  const [viewDate, setViewDate] = useState(new Date());
+  const viewYear = viewDate.getFullYear();
+  const viewMonth = viewDate.getMonth();
+
   const loadEvents = async () => {
     try {
       const data = await api.get<CalendarEvent[]>("/api/calendar/events");
@@ -92,11 +96,8 @@ export default function StudentCalendar() {
       new Date(b.start_datetime).getTime(),
   );
 
-  const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
-  const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const firstDayOfMonth = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
   const offset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
 
   const getEventsForDay = (day: number) =>
@@ -104,8 +105,8 @@ export default function StudentCalendar() {
       const d = new Date(ev.start_datetime);
       return (
         d.getDate() === day &&
-        d.getMonth() === currentMonth &&
-        d.getFullYear() === currentYear
+        d.getMonth() === viewMonth &&
+        d.getFullYear() === viewYear
       );
     });
 
@@ -146,6 +147,31 @@ export default function StudentCalendar() {
       default:
         return "bg-brand-primary";
     }
+  };
+
+  const monthNames = [
+    "Январь",
+    "Февраль",
+    "Март",
+    "Апрель",
+    "Май",
+    "Июнь",
+    "Июль",
+    "Август",
+    "Сентябрь",
+    "Октябрь",
+    "Ноябрь",
+    "Декабрь",
+  ];
+
+  const prevMonth = () => {
+    setViewDate(new Date(viewYear, viewMonth - 1, 1));
+  };
+  const nextMonth = () => {
+    setViewDate(new Date(viewYear, viewMonth + 1, 1));
+  };
+  const goToToday = () => {
+    setViewDate(new Date());
   };
 
   return (
@@ -263,70 +289,107 @@ export default function StudentCalendar() {
             </div>
           }
         >
-          <div className="mt-4 bg-surface border border-border-subtle rounded-xl p-4 overflow-x-auto">
-            <div className="grid grid-cols-7 gap-px bg-border-subtle rounded-lg overflow-hidden">
-              {["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].map((d) => (
-                <div
-                  key={d}
-                  className="bg-canvas text-center py-2 text-[10px] font-bold text-text-muted uppercase font-mono"
+          <div className="mt-4">
+            {/* Навигация по месяцам */}
+            <div className="flex justify-between items-center mb-4 px-2">
+              <div className="flex gap-2">
+                <Button
+                  isIconOnly
+                  size="sm"
+                  variant="light"
+                  onClick={prevMonth}
+                  className="text-text-muted hover:text-text-main"
                 >
-                  {d}
-                </div>
-              ))}
-              {Array.from({ length: offset + daysInMonth }).map((_, idx) => {
-                const dayNum = idx - offset + 1;
-                if (dayNum < 1 || dayNum > daysInMonth)
+                  <Icon icon="lucide:chevron-left" className="w-4 h-4" />
+                </Button>
+                <Button
+                  isIconOnly
+                  size="sm"
+                  variant="light"
+                  onClick={nextMonth}
+                  className="text-text-muted hover:text-text-main"
+                >
+                  <Icon icon="lucide:chevron-right" className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="text-sm font-mono font-bold text-text-main">
+                {monthNames[viewMonth]} {viewYear}
+              </div>
+              <Button
+                size="sm"
+                variant="light"
+                onClick={goToToday}
+                className="text-xs font-mono text-text-muted hover:text-text-main"
+              >
+                Сегодня
+              </Button>
+            </div>
+
+            <div className="bg-surface border border-border-subtle rounded-xl p-4 overflow-x-auto">
+              <div className="grid grid-cols-7 gap-px bg-border-subtle rounded-lg overflow-hidden">
+                {["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].map((d) => (
+                  <div
+                    key={d}
+                    className="bg-canvas text-center py-2 text-[10px] font-bold text-text-muted uppercase font-mono"
+                  >
+                    {d}
+                  </div>
+                ))}
+                {Array.from({ length: offset + daysInMonth }).map((_, idx) => {
+                  const dayNum = idx - offset + 1;
+                  if (dayNum < 1 || dayNum > daysInMonth)
+                    return (
+                      <div
+                        key={idx}
+                        className="bg-surface min-h-[80px] p-2 border-t border-l first:border-l-0 border-border-subtle relative"
+                      />
+                    );
+                  const dayEvents = getEventsForDay(dayNum);
+                  const hasEvents = dayEvents.length > 0;
+                  const dotColor = getDotColor(dayEvents);
                   return (
                     <div
                       key={idx}
                       className="bg-surface min-h-[80px] p-2 border-t border-l first:border-l-0 border-border-subtle relative"
-                    />
-                  );
-                const dayEvents = getEventsForDay(dayNum);
-                const hasEvents = dayEvents.length > 0;
-                const dotColor = getDotColor(dayEvents);
-                return (
-                  <div
-                    key={idx}
-                    className="bg-surface min-h-[80px] p-2 border-t border-l first:border-l-0 border-border-subtle relative"
-                  >
-                    <span className="text-[10px] text-text-muted font-bold">
-                      {dayNum}
-                    </span>
-                    {hasEvents && (
-                      <Tooltip
-                        content={
-                          <div className="flex flex-col gap-1">
-                            {dayEvents.map((ev) => (
-                              <div
-                                key={ev.id}
-                                className="flex items-center gap-1 text-xs"
-                              >
-                                <span className="font-bold">{ev.title}</span>
-                                <Chip
-                                  size="sm"
-                                  color={
-                                    typeConfig[ev.type]?.color || "default"
-                                  }
-                                  variant="flat"
-                                  className="text-[9px] h-4"
+                    >
+                      <span className="text-[10px] text-text-muted font-bold">
+                        {dayNum}
+                      </span>
+                      {hasEvents && (
+                        <Tooltip
+                          content={
+                            <div className="flex flex-col gap-1">
+                              {dayEvents.map((ev) => (
+                                <div
+                                  key={ev.id}
+                                  className="flex items-center gap-1 text-xs"
                                 >
-                                  {typeConfig[ev.type]?.label || ev.type}
-                                </Chip>
-                              </div>
-                            ))}
-                          </div>
-                        }
-                        placement="top"
-                      >
-                        <div
-                          className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full cursor-pointer hover:w-2.5 hover:h-2.5 transition-all ${dotColor}`}
-                        />
-                      </Tooltip>
-                    )}
-                  </div>
-                );
-              })}
+                                  <span className="font-bold">{ev.title}</span>
+                                  <Chip
+                                    size="sm"
+                                    color={
+                                      typeConfig[ev.type]?.color || "default"
+                                    }
+                                    variant="flat"
+                                    className="text-[9px] h-4"
+                                  >
+                                    {typeConfig[ev.type]?.label || ev.type}
+                                  </Chip>
+                                </div>
+                              ))}
+                            </div>
+                          }
+                          placement="top"
+                        >
+                          <div
+                            className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full cursor-pointer hover:w-2.5 hover:h-2.5 transition-all ${dotColor}`}
+                          />
+                        </Tooltip>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </Tab>

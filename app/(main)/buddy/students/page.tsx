@@ -33,7 +33,9 @@ export default function BuddyStudents() {
     api
       .get("/api/my-students")
       .then((response: any) => {
-        const rawStudents = response.data || [];
+        const rawStudents = Array.isArray(response)
+          ? response
+          : response?.data || [];
 
         const normalized = rawStudents.map((s: any) => ({
           id: s.id || s.ID,
@@ -91,7 +93,7 @@ export default function BuddyStudents() {
                           target="_blank"
                           className="text-[11px] text-brand-primary"
                         >
-                          @{s.telegram_username}
+                          {s.telegram_username}
                         </a>
                       )}
                     </div>

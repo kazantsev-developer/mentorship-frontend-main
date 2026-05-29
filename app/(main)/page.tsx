@@ -12,7 +12,7 @@ export default function DashboardPage() {
     if (!user) return;
     const role = getSelectedRole();
     if (role === "student") {
-      router.replace("/student/roadmap");
+      router.replace("/student/progress");
     } else if (role === "buddy") {
       router.replace("/buddy/students");
     } else {
