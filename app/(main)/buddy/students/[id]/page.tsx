@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
 import { api } from "@/components/api";
 import {
   Card,
@@ -46,9 +46,9 @@ interface Activity {
 export default function BuddyStudentDetail({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const { id: studentId } = use(params);
+  const { id: studentId } = params;
   const [student, setStudent] = useState<Student | null>(null);
   const [blocks, setBlocks] = useState<BlockProgress[]>([]);
   const [activity, setActivity] = useState<Activity[]>([]);
@@ -63,8 +63,12 @@ export default function BuddyStudentDetail({
     try {
       const [studentRes, blocksRes, activityRes] = await Promise.all([
         api.get<Student>(`/api/buddy/students/${studentId}`),
-        api.get<BlockProgress[]>(`/api/buddy/students/${studentId}/roadmap`).catch(() => []),
-        api.get<Activity[]>(`/api/buddy/students/${studentId}/activity`).catch(() => []),
+        api
+          .get<BlockProgress[]>(`/api/buddy/students/${studentId}/roadmap`)
+          .catch(() => []),
+        api
+          .get<Activity[]>(`/api/buddy/students/${studentId}/activity`)
+          .catch(() => []),
       ]);
       setStudent(studentRes);
       setBlocks(blocksRes || []);
