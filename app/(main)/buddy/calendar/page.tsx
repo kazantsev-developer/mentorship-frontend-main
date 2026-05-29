@@ -77,7 +77,10 @@ export default function BuddyCalendar() {
         api.get<CalendarEvent[]>("/api/calendar/events"),
         api.get<Student[]>("/api/my-students"),
       ]);
-      setEvents(eventsData || []);
+      const normalizedEvents = Array.isArray(eventsData)
+        ? eventsData
+        : (eventsData as any)?.data || [];
+      setEvents(normalizedEvents);
       setStudents(studentsData || []);
     } catch (err) {
       console.error(err);
@@ -93,7 +96,9 @@ export default function BuddyCalendar() {
   const createEvent = async () => {
     if (!newEvent.title || !newEvent.student_id || !newEvent.start_datetime)
       return;
-    await api.post("/api/calendar/events", newEvent);
+    const isoDate = new Date(newEvent.start_datetime).toISOString();
+    const payload = { ...newEvent, start_datetime: isoDate };
+    await api.post("/api/calendar/events", payload);
     onClose();
     loadData();
     setNewEvent({

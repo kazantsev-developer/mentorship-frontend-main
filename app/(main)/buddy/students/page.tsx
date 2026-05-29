@@ -59,14 +59,6 @@ export default function BuddyStudents() {
 
   return (
     <div className="w-full max-w-[1400px] mx-auto bg-canvas min-h-screen text-text-main py-8 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight font-mono">
-          Мои ученики
-        </h1>
-        <p className="text-sm text-text-muted">
-          Контроль прогресса закреплённых студентов
-        </p>
-      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {students.map((s) => {
           const needAttention = s.status === "waiting_buddy_confirmation";

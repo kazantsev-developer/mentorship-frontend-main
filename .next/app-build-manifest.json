@@ -1,20 +1,40 @@
 {
   "pages": {
+    "/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/page.js"
+    ],
     "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/(main)/student/calendar/page": [
+    "/(main)/student/roadmap/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(main)/student/calendar/page.js"
+      "static/chunks/app/(main)/student/roadmap/page.js"
     ],
     "/(main)/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(main)/layout.js"
+    ],
+    "/(main)/buddy/students/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(main)/buddy/students/page.js"
+    ],
+    "/(main)/buddy/calendar/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(main)/buddy/calendar/page.js"
+    ],
+    "/(main)/buddy/students/[id]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(main)/buddy/students/[id]/page.js"
     ],
     "/(auth)/login/page": [
       "static/chunks/webpack.js",
@@ -25,21 +45,6 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(auth)/layout.js"
-    ],
-    "/(main)/student/roadmap/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(main)/student/roadmap/page.js"
-    ],
-    "/(main)/student/progress/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(main)/student/progress/page.js"
-    ],
-    "/(main)/student/interviews/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(main)/student/interviews/page.js"
     ]
   }
 }
