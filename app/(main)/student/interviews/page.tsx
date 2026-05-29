@@ -223,7 +223,7 @@ export default function StudentInterviews() {
       </div>
 
       {selectedTab === "my" && (
-        <div>
+        <div className="flex flex-col gap-4">
           {myInterviews.map(renderCard)}
           {myInterviews.length === 0 && (
             <p className="text-xs font-mono text-text-muted text-center py-8">
@@ -234,7 +234,7 @@ export default function StudentInterviews() {
       )}
 
       {selectedTab === "global" && (
-        <div>
+        <div className="flex flex-col gap-4">
           {globalInterviews.map(renderCard)}
           {globalInterviews.length === 0 && (
             <p className="text-xs font-mono text-text-muted text-center py-8">

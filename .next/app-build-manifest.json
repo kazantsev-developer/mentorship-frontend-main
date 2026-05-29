@@ -31,10 +31,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(main)/student/roadmap/page.js"
     ],
-    "/_not-found/page": [
+    "/(main)/student/progress/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/_not-found/page.js"
+      "static/chunks/app/(main)/student/progress/page.js"
+    ],
+    "/(main)/student/interviews/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(main)/student/interviews/page.js"
     ]
   }
 }

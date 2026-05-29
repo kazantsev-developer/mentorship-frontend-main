@@ -1713,6 +1713,9 @@ video {
 .gap-px {
   gap: 1px;
 }
+.gap-8 {
+  gap: 2rem;
+}
 .gap-x-0 {
   -moz-column-gap: 0px;
        column-gap: 0px;
