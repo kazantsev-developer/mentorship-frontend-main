@@ -502,7 +502,6 @@ export default function BuddyStudentDetail({
             </Select>
             <Input
               type="datetime-local"
-              label="Дата и время"
               size="sm"
               value={scheduledAt}
               onChange={(e) => setScheduledAt(e.target.value)}
