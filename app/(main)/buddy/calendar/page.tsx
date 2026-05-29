@@ -75,7 +75,7 @@ export default function BuddyCalendar() {
     try {
       const [eventsData, studentsData] = await Promise.all([
         api.get<CalendarEvent[]>("/api/calendar/events"),
-        api.get<Student[]>("/api/buddy/students"),
+        api.get<Student[]>("/api/my-students"),
       ]);
       setEvents(eventsData || []);
       setStudents(studentsData || []);

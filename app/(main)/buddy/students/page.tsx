@@ -93,7 +93,7 @@ export default function BuddyStudents() {
                           target="_blank"
                           className="text-[11px] text-brand-primary"
                         >
-                          @{s.telegram_username}
+                          {s.telegram_username}
                         </a>
                       )}
                     </div>

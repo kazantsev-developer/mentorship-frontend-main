@@ -1,8 +1,7 @@
 {
-  "/(main)/buddy/students/page": "app/(main)/buddy/students/page.js",
-  "/(main)/student/progress/page": "app/(main)/student/progress/page.js",
   "/(main)/student/roadmap/page": "app/(main)/student/roadmap/page.js",
   "/(main)/buddy/calendar/page": "app/(main)/buddy/calendar/page.js",
-  "/(auth)/login/page": "app/(auth)/login/page.js",
-  "/(main)/buddy/students/[id]/page": "app/(main)/buddy/students/[id]/page.js"
+  "/(main)/student/progress/page": "app/(main)/student/progress/page.js",
+  "/(main)/student/calendar/page": "app/(main)/student/calendar/page.js",
+  "/(auth)/login/page": "app/(auth)/login/page.js"
 }
