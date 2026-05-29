@@ -16,6 +16,8 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
+  Select,
+  SelectItem,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { toast } from "sonner";
@@ -38,9 +40,16 @@ interface Student {
 
 interface Activity {
   id: string;
-  reason?: string;
-  metadata?: { description?: string };
+  type: string;
+  metadata: string; // JSON строка
   created_at: string;
+}
+
+interface FinalCheck {
+  id: string;
+  type: "final_technical" | "final_roast";
+  status: string;
+  scheduled_at: string | null;
 }
 
 export default function BuddyStudentDetail({
@@ -52,16 +61,35 @@ export default function BuddyStudentDetail({
   const [student, setStudent] = useState<Student | null>(null);
   const [blocks, setBlocks] = useState<BlockProgress[]>([]);
   const [activity, setActivity] = useState<Activity[]>([]);
+  const [finalChecks, setFinalChecks] = useState<FinalCheck[]>([]);
   const [loading, setLoading] = useState(true);
+  const [submittingMock, setSubmittingMock] = useState(false);
+  const [submittingFinal, setSubmittingFinal] = useState(false);
+
+  // Mock-интервью
   const [company, setCompany] = useState("");
   const [position, setPosition] = useState("");
   const [feedback, setFeedback] = useState("");
-  const [submittingMock, setSubmittingMock] = useState(false);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: mockOpen,
+    onOpen: onMockOpen,
+    onClose: onMockClose,
+  } = useDisclosure();
+
+  // Финальная проверка
+  const [finalType, setFinalType] = useState<"final_technical" | "final_roast">(
+    "final_technical",
+  );
+  const [scheduledAt, setScheduledAt] = useState("");
+  const {
+    isOpen: finalOpen,
+    onOpen: onFinalOpen,
+    onClose: onFinalClose,
+  } = useDisclosure();
 
   const loadData = async () => {
     try {
-      const [studentRes, blocksRes, activityRes] = await Promise.all([
+      const [studentRes, blocksRes, activityRes, finalRes] = await Promise.all([
         api.get<Student>(`/api/buddy/students/${studentId}`),
         api
           .get<BlockProgress[]>(`/api/buddy/students/${studentId}/roadmap`)
@@ -69,10 +97,14 @@ export default function BuddyStudentDetail({
         api
           .get<Activity[]>(`/api/buddy/students/${studentId}/activity`)
           .catch(() => []),
+        api
+          .get<FinalCheck[]>(`/api/final-checks/student/${studentId}`)
+          .catch(() => []),
       ]);
       setStudent(studentRes);
       setBlocks(blocksRes || []);
       setActivity(activityRes || []);
+      setFinalChecks(finalRes || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -92,7 +124,7 @@ export default function BuddyStudentDetail({
       });
       toast.success("Блок подтверждён! Студент получит бонусы");
       await loadData();
-    } catch (err) {
+    } catch {
       toast.error("Ошибка подтверждения блока");
     }
   };
@@ -113,11 +145,70 @@ export default function BuddyStudentDetail({
       setPosition("");
       setFeedback("");
       await loadData();
-      onClose();
-    } catch (err) {
+      onMockClose();
+    } catch {
       toast.error("Ошибка сохранения mock-собеседования");
     } finally {
       setSubmittingMock(false);
+    }
+  };
+
+  const scheduleFinalCheck = async () => {
+    if (!scheduledAt) return;
+    setSubmittingFinal(true);
+    try {
+      await api.post("/api/final-checks/schedule", {
+        student_id: studentId,
+        type: finalType,
+        scheduled_at: new Date(scheduledAt).toISOString(),
+      });
+      toast.success(
+        `Финальная проверка "${finalType === "final_technical" ? "Техничка" : "Прожарка"}" назначена`,
+      );
+      await loadData();
+      onFinalClose();
+      setScheduledAt("");
+    } catch {
+      toast.error("Ошибка назначения финальной проверки");
+    } finally {
+      setSubmittingFinal(false);
+    }
+  };
+
+  const completeFinalCheck = async (checkId: string, passed: boolean) => {
+    try {
+      await api.post("/api/final-checks/complete", {
+        check_id: checkId,
+        passed,
+      });
+      toast.success(
+        passed
+          ? "Финальная проверка пройдена"
+          : "Финальная проверка не пройдена",
+      );
+      await loadData();
+    } catch {
+      toast.error("Ошибка изменения статуса");
+    }
+  };
+
+  const getActivityMessage = (act: Activity) => {
+    try {
+      const meta = JSON.parse(act.metadata || "{}");
+      switch (act.type) {
+        case "material_viewed":
+          return `Отметил материал: ${meta.title || "без названия"}`;
+        case "block_approved":
+          return `Подтвердил блок: ${meta.block_id || "блок"}`;
+        case "mock_created":
+          return `Создал mock-собеседование в компании ${meta.company || "неизвестно"} на позицию ${meta.position || "неизвестна"}`;
+        case "achievement_earned":
+          return `Получил достижение: ${meta.title || "без названия"}`;
+        default:
+          return "Действие";
+      }
+    } catch {
+      return "Действие";
     }
   };
 
@@ -137,18 +228,30 @@ export default function BuddyStudentDetail({
             ID: {studentId}
           </p>
         </div>
-        <Button
-          size="sm"
-          color="primary"
-          className="font-mono text-xs"
-          startContent={<Icon icon="lucide:video" />}
-          onClick={onOpen}
-        >
-          Зафиксировать Mock-интервью
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            color="primary"
+            className="font-mono text-xs"
+            startContent={<Icon icon="lucide:video" />}
+            onClick={onMockOpen}
+          >
+            Зафиксировать Mock-интервью
+          </Button>
+          <Button
+            size="sm"
+            color="secondary"
+            className="font-mono text-xs"
+            startContent={<Icon icon="lucide:clipboard-list" />}
+            onClick={onFinalOpen}
+          >
+            Назначить финальную проверку
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Левая колонка: прогресс по блокам */}
         <div className="lg:col-span-2 space-y-4">
           <h3 className="text-xs font-bold uppercase tracking-wider font-mono text-text-muted">
             Прогресс по блокам
@@ -213,38 +316,123 @@ export default function BuddyStudentDetail({
           })}
         </div>
 
-        <div className="space-y-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider font-mono text-text-muted">
-            Лог активности
-          </h3>
-          <Card className="bg-surface border border-border-subtle shadow-none rounded-xl">
-            <CardBody className="p-4 space-y-4 max-h-[500px] overflow-y-auto">
-              {activity.length === 0 && (
-                <p className="text-xs text-text-muted text-center py-4">
-                  Нет активности
-                </p>
-              )}
-              {activity.map((act, idx) => (
-                <div key={act.id || idx} className="flex gap-3 text-xs">
-                  <div className="p-1.5 bg-canvas rounded border border-border-subtle text-text-muted">
-                    <Icon icon="lucide:activity" className="w-3.5 h-3.5" />
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider font-mono text-text-muted">
+              Финальные проверки
+            </h3>
+            <Card className="bg-surface border border-border-subtle shadow-none rounded-xl mt-2">
+              <CardBody className="p-4 space-y-3">
+                {finalChecks.length === 0 && (
+                  <p className="text-xs text-text-muted text-center">
+                    Нет назначенных финальных проверок
+                  </p>
+                )}
+                {finalChecks.map((fc) => (
+                  <div
+                    key={fc.id}
+                    className="flex justify-between items-center border-b border-border-subtle/40 last:border-0 pb-2"
+                  >
+                    <div>
+                      <span className="text-xs font-mono font-semibold">
+                        {fc.type === "final_technical"
+                          ? "Техничка"
+                          : "Прожарка"}
+                      </span>
+                      <p className="text-[10px] text-text-muted">
+                        {fc.scheduled_at
+                          ? new Date(fc.scheduled_at).toLocaleString()
+                          : "—"}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Chip
+                        size="sm"
+                        color={
+                          fc.status === "completed"
+                            ? "success"
+                            : fc.status === "failed"
+                              ? "danger"
+                              : "warning"
+                        }
+                        variant="flat"
+                      >
+                        {fc.status === "scheduled"
+                          ? "Назначена"
+                          : fc.status === "completed"
+                            ? "Пройдена"
+                            : fc.status === "failed"
+                              ? "Не пройдена"
+                              : fc.status}
+                      </Chip>
+                      {fc.status === "scheduled" && (
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            color="success"
+                            variant="light"
+                            isIconOnly
+                            onClick={() => completeFinalCheck(fc.id, true)}
+                          >
+                            <Icon icon="lucide:check" className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            color="danger"
+                            variant="light"
+                            isIconOnly
+                            onClick={() => completeFinalCheck(fc.id, false)}
+                          >
+                            <Icon icon="lucide:x" className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-text-main">
-                      {act.reason || act.metadata?.description || "Действие"}
-                    </p>
-                    <p className="text-[10px] text-text-muted font-mono">
-                      {new Date(act.created_at).toLocaleString()}
-                    </p>
+                ))}
+              </CardBody>
+            </Card>
+          </div>
+
+          {/* Лог активности */}
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider font-mono text-text-muted">
+              Лог активности
+            </h3>
+            <Card className="bg-surface border border-border-subtle shadow-none rounded-xl mt-2">
+              <CardBody className="p-4 space-y-4 max-h-[500px] overflow-y-auto">
+                {activity.length === 0 && (
+                  <p className="text-xs text-text-muted text-center py-4">
+                    Нет активности
+                  </p>
+                )}
+                {activity.map((act, idx) => (
+                  <div key={act.id || idx} className="flex gap-3 text-xs">
+                    <div className="p-1.5 bg-canvas rounded border border-border-subtle text-text-muted">
+                      <Icon icon="lucide:activity" className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <p className="text-text-main">
+                        {getActivityMessage(act)}
+                      </p>
+                      <p className="text-[10px] text-text-muted font-mono">
+                        {act.created_at
+                          ? new Date(
+                              act.created_at.replace("+00", "Z"),
+                            ).toLocaleString()
+                          : "—"}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </CardBody>
-          </Card>
+                ))}
+              </CardBody>
+            </Card>
+          </div>
         </div>
       </div>
 
-      <Modal isOpen={isOpen} onClose={onClose}>
+      {/* Модалка mock собеседования */}
+      <Modal isOpen={mockOpen} onClose={onMockClose}>
         <ModalContent>
           <ModalHeader className="font-mono">
             Результаты Mock-собеседования
@@ -273,7 +461,7 @@ export default function BuddyStudentDetail({
             />
           </ModalBody>
           <ModalFooter>
-            <Button size="sm" variant="flat" onClick={onClose}>
+            <Button size="sm" variant="flat" onClick={onMockClose}>
               Отмена
             </Button>
             <Button
@@ -283,6 +471,54 @@ export default function BuddyStudentDetail({
               onClick={createMock}
             >
               Сохранить
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Модалка назначения финальной проверки */}
+      <Modal isOpen={finalOpen} onClose={onFinalClose}>
+        <ModalContent>
+          <ModalHeader className="font-mono">
+            Назначить финальную проверку
+          </ModalHeader>
+          <ModalBody className="space-y-3">
+            <Select
+              label="Тип проверки"
+              size="sm"
+              selectedKeys={[finalType]}
+              onSelectionChange={(keys) =>
+                setFinalType(
+                  Array.from(keys)[0] as "final_technical" | "final_roast",
+                )
+              }
+            >
+              <SelectItem key="final_technical" textValue="Техничка">
+                Техничка
+              </SelectItem>
+              <SelectItem key="final_roast" textValue="Прожарка">
+                Прожарка
+              </SelectItem>
+            </Select>
+            <Input
+              type="datetime-local"
+              label="Дата и время"
+              size="sm"
+              value={scheduledAt}
+              onChange={(e) => setScheduledAt(e.target.value)}
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button size="sm" variant="flat" onClick={onFinalClose}>
+              Отмена
+            </Button>
+            <Button
+              size="sm"
+              color="primary"
+              isLoading={submittingFinal}
+              onClick={scheduleFinalCheck}
+            >
+              Назначить
             </Button>
           </ModalFooter>
         </ModalContent>
