@@ -107,7 +107,7 @@ export default function Header() {
           )}
         </Button>
 
-        <Button
+        {/* <Button
           isIconOnly
           size="sm"
           variant="light"
@@ -116,7 +116,7 @@ export default function Header() {
           title="Панель администратора"
         >
           <Icon icon="lucide:settings" className="w-[18px] h-[18px]" />
-        </Button>
+        </Button> */}
 
         <Button
           isIconOnly
