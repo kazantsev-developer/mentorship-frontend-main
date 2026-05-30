@@ -9,7 +9,6 @@ export interface User {
   is_profile_private: boolean;
   roles: ("student" | "buddy" | "admin")[];
 }
-
 export interface RoadmapMaterial {
   id: string;
   block_id: string;
@@ -18,7 +17,6 @@ export interface RoadmapMaterial {
   type: "theory" | "questions" | "practice" | "homework";
   content_type: "url" | "youtube" | "github" | "article" | "text" | "file";
   url?: string;
-  content?: string;
   is_required: boolean;
   is_active: boolean;
   sort_order: number;
