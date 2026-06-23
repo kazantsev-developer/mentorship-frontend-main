@@ -1,74 +1,79 @@
-# Платформа менторства по Go (Frontend – Student/Buddy)
+# Go Mentorship Platform (Frontend – Student/Buddy)
 
-Веб-интерфейс для студентов и наставников (buddy). Реализован на Next.js + TypeScript, Tailwind CSS и HeroUI.
+The official web frontend for students and mentors (buddies), powered by Next.js, TypeScript, Tailwind CSS, and HeroUI.
 
-## Запуск через Docker Compose
+## Deployment via Docker Compose
 
-## Склонируйте репозиторий и перейдите в папку проекта:
-
-git clone https://github.com/kazantsev-developer/mentorship-frontend-main.git
+1. Clone the repository and navigate to the project root:
+```bash
+git clone https://github.com/kazantsev-developer/mentorship-frontend-main
 cd mentorship-frontend-main
-Передайте адрес бэкенда при сборке (или создайте .env.local):
+```
 
+2. Pass the backend API URL during compilation or create a `.env.local` file:
+```bash
 docker-compose build --build-arg NEXT_PUBLIC_API_URL=http://185.75.189.130:8080
 docker-compose up -d
-Фронтенд будет доступен по адресу http://localhost:3000.
+```
+The frontend application will be accessible at http://localhost:3000.
 
-## Локальная разработка
+## Local Development
 
+```bash
+# Install dependencies
 npm install
+
+# Start the development server
 npm run dev
+```
 
-## Демо-аккаунты
+## Demo Credentials
 
-Роль Логин Пароль
-Студент test_student 123
-Бадди test_buddy 123
-Админ admin 123
+* **Student:** `test_student` / `123`
+* **Buddy (Mentor):** `test_buddy` / `123`
+* **Admin:** `admin` / `123`
 
-## Технологии
+## Tech Stack
 
-Next.js 14 (App Router, клиентские компоненты)
-TypeScript
-Tailwind CSS + CSS-переменные (тёмная/светлая тема)
-HeroUI (Card, Button, Modal, Progress, Chip, Avatar)
-Framer Motion (анимации карточек материалов)
-Iconify (иконки)
-Sonner (toast-уведомления)
-next-themes (переключение тем)
+* **Core Framework:** Next.js 14 (App Router, Client Components), TypeScript
+* **Styling & UI:** Tailwind CSS with native CSS variables (Dark/Light mode support), HeroUI
+* **Animations & Icons:** Framer Motion, Iconify
+* **Utilities:** Sonner (Toast notifications), next-themes (Theme management)
 
-## Основные возможности
+## Key Features
 
-### Для студента
+### Student Interface
+* **Interactive Roadmap:** Structured modules covering Theory, Q&A, Practice, and Assignments.
+* **Resource Preview Cards:** Rich link previews for URL, YouTube, and GitHub resources.
+* **Material Tracking:** Status indicators for mandatory and optional learning materials.
+* **Progress Analytics:** Granular progress tracking per module alongside an overall completion metrics dashboard.
+* **Gamification Engine:** Automated achievement system featuring 14 distinct unlockable badge types.
+* **Bonus Economy:** Transaction history ledger with a conversion system offering up to a 15% discount.
+* **Interview Prep:** Mock and live interview scheduling infrastructure.
+* **Mentorship Sessions:** One-on-one mentor booking workflow.
+* **Event Calendar:** Integrated scheduling calendar for milestone tracking.
+* **Public Profile:** User portfolio customization with fine-grained privacy controls.
 
-Roadmap с блоками (теория, вопросы, практика, домашка)
-Карточки материалов с preview (URL, YouTube, GitHub)
-Отметка материалов (обязательные и optional)
-Прогресс по блокам и общий прогресс
-Система достижений (14 типов, автоматическая выдача)
-Бонусная экономика (история операций, конвертация в скидку до 15%)
-Mock- и real-собеседования
-Заявки на 1x1 с ментором
-Календарь событий
-Публичный профиль с настройкой приватности
+### Buddy (Mentor) Interface
+* **Student Roster:** High-level dashboard monitoring assigned students, complete with progress status and inactivity alerts.
+* **Deep-Dive Analytics:** Detailed inspection of student module completion metrics.
+* **Module Verifications:** Approval mechanism for signing off on completed study modules.
+* **Interview Management:** Lifecycle control for creating, conducting, and concluding mock interviews.
+* **Feedback Loops:** Formal evaluation systems for structural interview debriefs.
+* **Calendar Control:** Direct CRUD execution capabilities on the shared event calendar.
 
-### Для наставника (buddy)
+## Authentication Mechanism
 
-Список закреплённых учеников (прогресс, статус, дни неактивности)
-Детальный просмотр прогресса ученика
-Подтверждение закрытия блоков
-Создание и завершение mock-собеседований
-Фидбэк по собеседованиям
-Календарь событий (создание/редактирование)
+* **Token Lifecycle:** JSON Web Tokens (JWT) are saved persistently across local storage and HTTP cookies.
+* **Request Interception:** Outgoing requests automatically inject the `Authorization: Bearer <token>` header payload.
+* **Multi-Role Handling:** Users with multiple assigned system roles are presented with a role selection gateway during authorization. The active workspace preference is cached across distinct sessions.
 
-### Авторизация
+## API Connectivity Check
 
-Токен сохраняется в localStorage и в cookies.
-При запросах автоматически подставляется Authorization: Bearer <token>.
-Если пользователь имеет несколько ролей – сначала показывает экран выбора роли. Выбранная роль сохраняется между сессиями.
+Validate connection to the backend infrastructure with the following request payload:
 
-## Проверка работы API
-
-После запуска бэкенда выполните:
-
-curl -X POST http://localhost:8080/api/auth/login -H "Content-Type: application/json" -d '{"login":"test_buddy","password":"123"}'
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"login":"test_buddy","password":"123"}'
+```
