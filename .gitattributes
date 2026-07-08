@@ -1,0 +1,7 @@
+# Скрыть CSS и Tailwind стили из общей статистики языков проекта
+*.css linguist-vendored
+*.scss linguist-vendored
+
+# Явно указать, что все файлы исходного кода относятся к TypeScript
+*.ts linguist-detectable=true
+*.tsx linguist-detectable=true
