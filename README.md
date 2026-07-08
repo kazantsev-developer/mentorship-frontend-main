@@ -1,79 +1,89 @@
-# Go Mentorship Platform (Frontend – Student/Buddy)
+# Go Mentorship Platform (Frontend — Student/Mentor Interface)
 
-The official web frontend for students and mentors (buddies), powered by Next.js, TypeScript, Tailwind CSS, and HeroUI.
+The primary web client for students and mentors (buddies) of the Go mentorship ecosystem. Built using Next.js 14, TypeScript, Tailwind CSS, and HeroUI, this responsive interface delivers roadmaps, gamification components, and administrative tracking tools.
 
-## Deployment via Docker Compose
+---
 
-1. Clone the repository and navigate to the project root:
+## Technical Stack
+
+* **Core Framework:** Next.js 14 (App Router utilizing decoupled client-side routing)
+* **Language:** TypeScript
+* **UI & Styling:** Tailwind CSS (Dark/Light mode via global CSS variables) & HeroUI (Card, Button, Modal, Progress, Chip, Avatar)
+* **Animations:** Framer Motion (fluid viewport transitions and card flips)
+* **Utility Engines:** Iconify (icon resolution), Sonner (toast notifications), next-themes (theme mapping orchestration)
+
+---
+
+## Production Deployment via Docker Compose
+
+1. Clone the repository and navigate to the project root directory:
 ```bash
-git clone https://github.com/kazantsev-developer/mentorship-frontend-main
+git clone https://github.com
 cd mentorship-frontend-main
 ```
 
-2. Pass the backend API URL during compilation or create a `.env.local` file:
+2. Build and execute the production container, passing the backend endpoint during the compilation pipeline:
 ```bash
-docker-compose build --build-arg NEXT_PUBLIC_API_URL=http://185.75.189.130:8080
-docker-compose up -d
+docker compose build --build-arg NEXT_PUBLIC_API_URL=http://185.75.189.130:8080
+docker compose up -d
 ```
-The frontend application will be accessible at http://localhost:3000.
+The application will accept connections at `http://localhost:3000`.
 
-## Local Development
+---
 
+## Local Development Setup
+
+1. Install dependencies:
 ```bash
-# Install dependencies
 npm install
+```
 
-# Start the development server
+2. Spin up the Vite/Next.js development instance:
+```bash
 npm run dev
 ```
 
-## Demo Credentials
+---
 
-* **Student:** `test_student` / `123`
-* **Buddy (Mentor):** `test_buddy` / `123`
-* **Admin:** `admin` / `123`
+## Platform Features
 
-## Tech Stack
+### Student Framework
+* **Interactive Roadmap:** Partitioned learning tracks including modular blocks for theory, conceptual questions, practice exercises, and homework assignments.
+* **Curriculum Materials:** Embedded payload preview windows optimized for raw URLs, YouTube media streams, and GitHub code repositories.
+* **Granular Tracking:** Structural tracking of content completion flags separated by required and optional progress states.
+* **Gamification & Rewards:** 14 automated achievement types linked to a functional reward system.
+* **Bonus Economy Ledger:** Audited transaction logs tracks user point accumulation convertible into enterprise platform tier discounts (up to 15%).
+* **Assessment Framework:** Orchestrated scheduling systems for simulated mock interviews, production-level code evaluation, and live 1-on-1 mentor sessions.
+* **Event Architecture:** Dynamic platform schedule calendar alongside customizable visibility layers for public profiles.
 
-* **Core Framework:** Next.js 14 (App Router, Client Components), TypeScript
-* **Styling & UI:** Tailwind CSS with native CSS variables (Dark/Light mode support), HeroUI
-* **Animations & Icons:** Framer Motion, Iconify
-* **Utilities:** Sonner (Toast notifications), next-themes (Theme management)
+### Mentor (Buddy) Architecture
+* **Assigned Mentee Roster:** Dedicated metrics tracking completion percentages, activity states, and automated inactivity timers.
+* **Deep-Dive Profiling:** Read-only access to progress tracks and explicit administrative blocks verification tools.
+* **Evaluation Framework:** Full lifecycle tools to initialize, grade, and finalize mock technical interviews with structured text feedback blocks.
+* **Schedule Manipulation:** Write-access parameters to create and alter centralized event calendars.
 
-## Key Features
+---
 
-### Student Interface
-* **Interactive Roadmap:** Structured modules covering Theory, Q&A, Practice, and Assignments.
-* **Resource Preview Cards:** Rich link previews for URL, YouTube, and GitHub resources.
-* **Material Tracking:** Status indicators for mandatory and optional learning materials.
-* **Progress Analytics:** Granular progress tracking per module alongside an overall completion metrics dashboard.
-* **Gamification Engine:** Automated achievement system featuring 14 distinct unlockable badge types.
-* **Bonus Economy:** Transaction history ledger with a conversion system offering up to a 15% discount.
-* **Interview Prep:** Mock and live interview scheduling infrastructure.
-* **Mentorship Sessions:** One-on-one mentor booking workflow.
-* **Event Calendar:** Integrated scheduling calendar for milestone tracking.
-* **Public Profile:** User portfolio customization with fine-grained privacy controls.
+## Authentication and API Lifecycle
 
-### Buddy (Mentor) Interface
-* **Student Roster:** High-level dashboard monitoring assigned students, complete with progress status and inactivity alerts.
-* **Deep-Dive Analytics:** Detailed inspection of student module completion metrics.
-* **Module Verifications:** Approval mechanism for signing off on completed study modules.
-* **Interview Management:** Lifecycle control for creating, conducting, and concluding mock interviews.
-* **Feedback Loops:** Formal evaluation systems for structural interview debriefs.
-* **Calendar Control:** Direct CRUD execution capabilities on the shared event calendar.
+Session states are maintained via encrypted `localStorage` entries combined with `httpOnly` secure tracking layer synchronization. Outbound requests are intercepted to inject `Authorization: Bearer <token>` tokens. 
 
-## Authentication Mechanism
+Multi-role identity parameters trigger an explicit boundary selection screen upon entry, persisting user-defined viewport states across subsequent platform interactions.
 
-* **Token Lifecycle:** JSON Web Tokens (JWT) are saved persistently across local storage and HTTP cookies.
-* **Request Interception:** Outgoing requests automatically inject the `Authorization: Bearer <token>` header payload.
-* **Multi-Role Handling:** Users with multiple assigned system roles are presented with a role selection gateway during authorization. The active workspace preference is cached across distinct sessions.
+---
 
-## API Connectivity Check
+## Verification Environment and Seeding
 
-Validate connection to the backend infrastructure with the following request payload:
+### Mock Database Credentials
 
+* **Student Role Profile:** Account Username: `test_student` | Secure Password: `123`
+* **Mentor Role Profile:** Account Username: `test_buddy` | Secure Password: `123`
+* **Administrator Profile:** Account Username: `admin` | Secure Password: `123`
+
+### API Health Check Probe
+Verify API integration by performing a manual target handshake with the login engine:
 ```bash
-curl -X POST http://localhost:8080/api/auth/login \
+curl -X POST http://185.75.189 \
   -H "Content-Type: application/json" \
   -d '{"login":"test_buddy","password":"123"}'
 ```
